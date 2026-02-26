@@ -29,17 +29,41 @@ void draw() {
 string calculator(string inp)
 {
     string temp;
-    int pointer = 0;
-    int deep = 0;
+    string front, back;
+    string pointer;
+    int bracket = 0;
     vector<string> divided;
     vector<string> brackets;
+    
+    string::iterator it;
+    
     for(int i = 0; i < inp.length(); i++)
     {
-        temp = inp.at(i);
+        back.clear();
+        temp.clear();
+        front.clear();
         if(temp.compare("(") == 0) {
-
+            bracket = i;
+            cout << "скобка обнаружен" << endl;
+        }
+        if(temp.compare(")") == 0 && bracket != 0) {
+            for(int j = 0; j < bracket; j++)
+            {
+                back = back + inp.at(j);
+            }
+            for(int j = bracket + 1; j < i ; j++)
+            {
+                temp = temp + inp.at(j);
+            }
+            for(int j = i + 1; j < inp.length(); j++)
+            {
+                front = front + inp.at(j);
+            }
+            return back + temp + front;
         }
     }
+    
+    bracket = 0;
     for(int i = 0; i < inp.length(); i++)
     {
         if(isn(inp.at(i))) {
@@ -285,8 +309,8 @@ int main()
         {
             string inp;
             cout << "Введите пример: ";
-            cin >> inp;;
-            calculator(inp);
+            cin >> inp;
+            cout << calculator(inp);
         }
 
     }
@@ -294,3 +318,4 @@ int main()
 }
 
 
+    
