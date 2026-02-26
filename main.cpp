@@ -8,12 +8,31 @@
 
 using namespace std;
 
+bool debug = false;
+
 int isn(char inp) {
     if(inp >= 48
             && inp <= 57) {
         return 1;
     }
     return 0;
+}
+
+int znak(char inp)
+{
+    if(inp == 42){
+        return 3;
+    }
+    else if(inp == 47){
+        return 4;
+    }
+    else if(inp == 43){
+        return 1;
+    }
+    else if(inp == 45){
+        return 2;
+    }
+    else{return 0;}
 }
 
 void draw() {
@@ -31,51 +50,98 @@ string calculator(string inp)
     string temp;
     string front, back;
     string pointer;
-    int bracket = 0;
+    int bracket = 1;
     vector<string> divided;
     vector<string> brackets;
-    
+
     string::iterator it;
-    
-    for(int i = 0; i < inp.length(); i++)
+    while(bracket != 0)
     {
-        back.clear();
-        temp.clear();
-        front.clear();
-        pointer =inp.at(i);
-        if(pointer.compare("(") == 0) {
-            bracket = i;
-            cout << "скобка обнаружен" << endl;
-        }
-        if(pointer.compare(")") == 0 && bracket != 0) {
-            for(int j = 0; j < bracket; j++)
-            {
-                back = back + inp.at(j);
+        bracket = 0;
+        for(int i = 0; i < inp.length(); i++)
+        {
+            back.clear();
+            temp.clear();
+            front.clear();
+            pointer = inp.at(i);
+            if(pointer.compare("(") == 0) {
+                bracket = i;
+                if(debug) {
+                    cout << "скобка обнаружена " << bracket << endl;
+                }
             }
-            for(int j = bracket + 1; j < i ; j++)
-            {
-                temp = temp + inp.at(j);
+            if(pointer.compare(")") == 0 && bracket != 0) {
+                for(int j = 0; j < bracket; j++)
+                {
+                    back = back + inp.at(j);
+                }
+                for(int j = bracket + 1; j < i ; j++)
+                {
+                    temp = temp + inp.at(j);
+                }
+                for(int j = i + 1; j < inp.length(); j++)
+                {
+                    front = front + inp.at(j);
+                }
+                inp = back + calculator(temp) + front;
+                if(debug) {
+                    cout << inp << endl;
+                }
             }
-            for(int j = i + 1; j < inp.length(); j++)
-            {
-                front = front + inp.at(j);
-            }
-            return back + calculator(temp) + front;
         }
     }
-    
     bracket = 0;
+    temp.clear();
     for(int i = 0; i < inp.length(); i++)
     {
+        /*
         if(isn(inp.at(i))) {
-        temp = temp + inp.at(i);
+            temp = temp + inp.at(i);
         }
-        else {
+        else if(znak(inp.at(i))){
             divided.push_back(temp);
-            temp = "";
+            temp.clear();
+            temp = inp.at(i);
+            divided.push_back(temp);
+        }
+        if(i = inp.length() - 1){
+            divided.push_back(temp);
+            temp.clear();
+        }
+        */
+        // THE GREAT DIVIDER
+        if(isn(inp.at(i))){
+            temp = temp + inp.at(i);
+            // if(debug){cout << "temp: " << temp << endl;}
+        }
+        else{
+            if(debug){cout << "temp(" + temp + ") pushed to divided and cleared" << endl;}
+            divided.push_back(temp);
+            temp.clear();
+        }
+        if(i == inp.length() - 1){
+            if(debug){cout << "temp(" + temp + ") pushed to divided and cleared as last" << endl;}
+            divided.push_back(temp);
+            temp.clear();
+        }
+        if(znak(inp.at(i))){
+            temp = inp.at(i);
+            if(debug){cout << "temp(" + temp + ") is znak pushed to divided" << endl;}
+            divided.push_back(temp);
+            temp.clear(); 
         }
     }
-    return "0";
+    if(debug){
+        cout << "Content of divided after division" << endl;
+        for(int i = 0; i < divided.size(); i++)
+        {
+            cout << divided.at(i) << endl;
+        }
+    }
+    while(false) {
+
+    }
+    return inp;
 }
 
 void vivod_znachenii(double num[6])
@@ -313,10 +379,21 @@ int main()
             cin >> inp;
             cout << calculator(inp);
         }
+        if(vibor == 7476) {
+            if(!debug) {
+                debug = true;
+                cout << "tududu" << endl;
+                continue;
+            }
+            if(debug) {
+                debug = false;
+                cout << "Ne hehe" << endl;
+                continue;
+            }
+        }
 
     }
     return 0;
 }
 
 
-    
