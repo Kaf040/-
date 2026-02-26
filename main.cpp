@@ -42,11 +42,12 @@ string calculator(string inp)
         back.clear();
         temp.clear();
         front.clear();
-        if(temp.compare("(") == 0) {
+        pointer =inp.at(i);
+        if(pointer.compare("(") == 0) {
             bracket = i;
             cout << "скобка обнаружен" << endl;
         }
-        if(temp.compare(")") == 0 && bracket != 0) {
+        if(pointer.compare(")") == 0 && bracket != 0) {
             for(int j = 0; j < bracket; j++)
             {
                 back = back + inp.at(j);
@@ -59,7 +60,7 @@ string calculator(string inp)
             {
                 front = front + inp.at(j);
             }
-            return back + temp + front;
+            return back + calculator(temp) + front;
         }
     }
     
