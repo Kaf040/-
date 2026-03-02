@@ -12,7 +12,7 @@ bool debug = false;
 
 int isn(char inp) {
     if(inp >= 48
-            && inp <= 57) {
+            && inp <= 57 || inp == 46 || inp == 44) {
         return 1;
     }
     return 0;
@@ -20,19 +20,21 @@ int isn(char inp) {
 
 int znak(char inp)
 {
-    if(inp == 42){
+    if(inp == 42) {
         return 3;
     }
-    else if(inp == 47){
+    else if(inp == 47) {
         return 4;
     }
-    else if(inp == 43){
+    else if(inp == 43) {
         return 1;
     }
-    else if(inp == 45){
+    else if(inp == 45) {
         return 2;
     }
-    else{return 0;}
+    else {
+        return 0;
+    }
 }
 
 void draw() {
@@ -50,50 +52,111 @@ string calculator(string inp)
     string temp;
     string front, back;
     string pointer;
-    int bracket = 1;
+    int bracket = 0;
+    int cznak = 0;
+    int negativ = 0, chislo = 0;
+    double a = 0, b = 0;
+    int pointa = 0, pointb = 0;
     vector<string> divided;
+    vector<double> chdiv;
+    vector<int> zndiv;
     vector<string> brackets;
 
-    string::iterator it;
-    while(bracket != 0)
+    /*
+    for(int i = 0; i < inp.length(); i++){
+
+    }
+    */
+
+    while(true)
     {
-        bracket = 0;
+        if(debug) {
+            cout << "Started debracketing loop" << endl;
+        }
+        a = 0;
         for(int i = 0; i < inp.length(); i++)
         {
             back.clear();
             temp.clear();
             front.clear();
             pointer = inp.at(i);
-            if(pointer.compare("(") == 0) {
+            if(debug) {
+                //cout << "Pointer: " << pointer << endl;
+            }
+            if(pointer == "(") {
+                if(isn(inp.at(i - 1)) && !i == 0)
+                {
+                    pointa = 1;
+                }
                 bracket = i;
                 if(debug) {
                     cout << "скобка обнаружена " << bracket << endl;
                 }
+                a = 1;
             }
-            if(pointer.compare(")") == 0 && bracket != 0) {
+
+
+
+            if(pointer == ")") {
+                if(!i == inp.length() - 1) {
+                    if(isn(inp.at(i + 1))) {
+                        pointb = 1;
+                    }
+                }
+                if(debug) {
+                    cout << ")" << endl;
+                }
+                back.clear();
                 for(int j = 0; j < bracket; j++)
                 {
                     back = back + inp.at(j);
                 }
-                for(int j = bracket + 1; j < i ; j++)
-                {
-                    temp = temp + inp.at(j);
-                }
+                front.clear();
                 for(int j = i + 1; j < inp.length(); j++)
                 {
                     front = front + inp.at(j);
                 }
-                inp = back + calculator(temp) + front;
-                if(debug) {
-                    cout << inp << endl;
+                temp.clear();
+                for(int j = bracket + 1; j < i ; j++)
+                {
+                    temp = temp + inp.at(j);
                 }
+                if(debug) {
+                    cout << "going deeper with " + temp << endl;
+                }
+
+
+                temp = calculator(temp);
+                if(pointa) {
+                    temp = "*" + temp;
+                }
+                if(pointb) {
+                    temp = temp + "*";
+                }
+                inp = back + temp + front;
+                if(debug) {
+                    cout << "after no-bracketing: " + inp << endl;
+                }
+                pointa = 0;
+                pointb = 0;
+                a = 1;
             }
         }
+        if(a == 0) {
+            break;
+        }
+
     }
+
     bracket = 0;
     temp.clear();
+    if(debug) {
+        cout << "Start calculating" << endl;
+    }
     for(int i = 0; i < inp.length(); i++)
     {
+        // absolutely not great divider
+
         /*
         if(isn(inp.at(i))) {
             temp = temp + inp.at(i);
@@ -109,39 +172,181 @@ string calculator(string inp)
             temp.clear();
         }
         */
+
         // THE GREAT DIVIDER
-        if(isn(inp.at(i))){
+        if(debug) {
+            cout << "inp: " + inp << endl;
+        };
+        if(isn(inp.at(i))) {
             temp = temp + inp.at(i);
-            // if(debug){cout << "temp: " << temp << endl;}
+            if(debug) {
+                cout << "temp: " << temp << endl;
+            }
         }
-        else{
-            if(debug){cout << "temp(" + temp + ") pushed to divided and cleared" << endl;}
-            divided.push_back(temp);
+        // запись чисел
+        else {
+            if(!temp.empty()) {
+                if(negativ) {
+                    if(debug) {
+                        cout << "temp(" + temp + ") pushed to chdiv and cleared as negativ" << endl;
+                    }
+                    chdiv.push_back(stod(temp + ".0") * -1);
+                }
+                else {
+                    if(debug) {
+                        cout << "temp(" + temp + ") pushed to chdiv and cleared" << endl;
+                    }
+                    chdiv.push_back(stod(temp + ".0"));
+                }
+            }
+            negativ = 0;
             temp.clear();
         }
-        if(i == inp.length() - 1){
-            if(debug){cout << "temp(" + temp + ") pushed to divided and cleared as last" << endl;}
-            divided.push_back(temp);
+        if(i == inp.length() - 1 && !temp.empty()) {
+            if(debug) {
+                cout << "temp(" + temp + ") pushed to chdiv and cleared as last" << endl;
+            }
+            if(negativ) {
+                chdiv.push_back(stod(temp + ".0") * -1);
+            }
+            else {
+                chdiv.push_back(stod(temp + ".0"));
+            }
+            negativ = 0;
             temp.clear();
         }
-        if(znak(inp.at(i))){
+        // запись знаков
+        if(znak(inp.at(i))) {
             temp = inp.at(i);
-            if(debug){cout << "temp(" + temp + ") is znak pushed to divided" << endl;}
-            divided.push_back(temp);
-            temp.clear(); 
+            negativ = 0;
+            if(znak(inp.at(i)) == 2) {
+                negativ = 1;
+                temp = "+";
+            }
+            if(i > 0) {
+                if(debug) {
+                    cout << "temp(" + temp + ") is znak pushed to zndiv" << endl;
+                }
+                zndiv.push_back(znak(inp.at(i)));
+            }
+            temp.clear();
         }
-    }
-    if(debug){
-        cout << "Content of divided after division" << endl;
-        for(int i = 0; i < divided.size(); i++)
-        {
-            cout << divided.at(i) << endl;
-        }
-    }
-    while(false) {
 
     }
-    return inp;
+    // cleaning
+
+
+    if(debug) {
+        cout << "Content of chdiv after division" << endl;
+        for(int i = 0; i < chdiv.size(); i++)
+        {
+            cout << chdiv.at(i) << endl;
+        }
+        cout << "Content of zndiv after division" << endl;
+        for(int i = 0; i < zndiv.size(); i++)
+        {
+            cout << zndiv.at(i) << endl;
+        }
+    }
+// отрицание чисел
+    /*
+    for(int i = 0; i < zndiv.size()){
+        temp = zndiv.at(i)
+        if(znak(temp) == 2){
+            if(i == 1){
+                chdiv.at(i) = chdiv.at(i) * -1;
+                zndiz.erase(i);
+            }
+            else{
+                chdiv.at(i + 1) = chdiv.at(i + 1) * -1;
+                zndiz.at(i) = "+";
+            }
+        }
+    }
+    */
+// Counter
+    while(true) {
+        //kak dumati?
+        cznak = 0;
+        bracket = 0;
+        // нахождение знака
+        // умножение или деление
+        for(int i = 0; i < zndiv.size(); i++) {
+            if(zndiv.at(i) > 2 && (cznak >= i || cznak == 0)) {
+                cznak = i;
+                bracket = 1;
+            }
+        }
+        // хоть что-нибудь
+        if(!cznak) {
+            for(int i = 0; i < zndiv.size(); i++) {
+                if(zndiv.at(i) > 0 && (cznak >= i || cznak == 0)) {
+                    cznak = i;
+                    bracket = 1;
+                }
+            }
+        }
+        if(debug) {
+            cout << "cznak:" << cznak << " bracket: " << bracket << endl;
+        }
+        // Нахождение чисел с которыми проводим операцию
+
+        if(bracket) {
+            //a = 0;
+            //b = 0;
+            chislo = cznak;
+            while(true) {
+                if(chdiv.at(chislo)) {
+                    a = chdiv.at(chislo);
+                    pointa = chislo;
+                    break;
+                }
+                --chislo;
+            }
+            chislo = cznak + 1;
+            while(true) {
+                if(chdiv.at(chislo)) {
+                    b = chdiv.at(chislo);
+                    pointb = chislo;
+                    break;
+                }
+                ++chislo;
+            }
+            if(debug) {
+                cout << "a: " << a << "  b: " << b << endl;
+                cout << "pointa: " << pointa << "  pointb: " << pointb << endl;
+            }
+            // счёт
+            // сложение
+            if(zndiv.at(cznak) == 1) {
+                a = a + b;
+                chdiv.at(pointa) = a;
+                chdiv.at(pointb) = 0;
+            }
+            // умножение
+            else if(zndiv.at(cznak) == 3) {
+                a = a * b;
+                chdiv.at(pointa) = a;
+                chdiv.at(pointb) = 0;
+            }
+            // деление
+            else if(zndiv.at(cznak) == 4) {
+                a = a / b;
+                chdiv.at(pointa) = a;
+                chdiv.at(pointb) = 0;
+            }
+            zndiv.at(cznak) = 0;
+        }
+        else {
+            break;
+        }
+    }
+    for(int i = 0; i < chdiv.size(); i++) {
+        if(chdiv.at(i)) {
+            a = chdiv.at(i);
+        }
+    }
+    return to_string(a);
 }
 
 void vivod_znachenii(double num[6])
@@ -377,7 +582,7 @@ int main()
             string inp;
             cout << "Введите пример: ";
             cin >> inp;
-            cout << calculator(inp);
+            cout << "Ответ: " + calculator(inp) << endl;
         }
         if(vibor == 7476) {
             if(!debug) {
@@ -397,3 +602,4 @@ int main()
 }
 
 
+    
