@@ -47,6 +47,33 @@ void draw() {
             << "A -------- B" << endl;
 }
 
+double fac(double x)
+{
+    double h = 1;
+    for(double i = x; i > 0; i--)
+    {
+        h = h * i;
+    }
+    return h;
+}
+
+void viboriz()
+{
+    double x;
+    double y;
+    std::cout << "k = ";
+    std::cin >> x;
+    std::cout << "n = ";
+    std::cin >> y;
+    double v = fac(y);
+    double n1 = fac(x);
+    double n2 = fac(y-x);
+    double n = n1 * n2;
+    double otv = v / n;
+    std::cout << "Ответ: " << otv << endl;
+    return;
+}
+
 string calculator(string inp)
 {
     string temp;
@@ -69,6 +96,7 @@ string calculator(string inp)
     */
 
     while(true)
+    //for(int j; j < 4; j++)
     {
         if(debug) {
             cout << "Started debracketing loop" << endl;
@@ -81,12 +109,14 @@ string calculator(string inp)
             front.clear();
             pointer = inp.at(i);
             if(debug) {
-                //cout << "Pointer: " << pointer << endl;
+                cout << "Pointer: " << pointer << endl;
             }
-            if(pointer == "(") {
-                if(isn(inp.at(i - 1)) && !i == 0)
-                {
-                    pointa = 1;
+            if(pointer.compare("(") == 0) {
+                if(i > 0) {
+                    if(isn(inp.at(i - 1)))
+                    {
+                        pointa = 1;
+                    }
                 }
                 bracket = i;
                 if(debug) {
@@ -104,7 +134,7 @@ string calculator(string inp)
                     }
                 }
                 if(debug) {
-                    cout << ")" << endl;
+                    cout << ") at " << i << endl;
                 }
                 back.clear();
                 for(int j = 0; j < bracket; j++)
@@ -140,6 +170,7 @@ string calculator(string inp)
                 pointa = 0;
                 pointb = 0;
                 a = 1;
+                break;
             }
         }
         if(a == 0) {
@@ -227,7 +258,15 @@ string calculator(string inp)
                 if(debug) {
                     cout << "temp(" + temp + ") is znak pushed to zndiv" << endl;
                 }
-                zndiv.push_back(znak(inp.at(i)));
+                if(znak(inp.at(i)) != 3) {
+                    zndiv.push_back(znak(inp.at(i)));
+                }
+                else if(znak(inp.at(i+1)) != 3 && znak(inp.at(i-1)) != 3 && znak(inp.at(i)) == 3) {
+                    zndiv.push_back(3);
+                }
+                else if(znak(inp.at(i)) == 3 && znak(inp.at(i+1)) == 3) {
+                    zndiv.push_back(5);
+                }
             }
             temp.clear();
         }
@@ -270,11 +309,20 @@ string calculator(string inp)
         cznak = 0;
         bracket = 0;
         // нахождение знака
-        // умножение или деление
+        // степень
         for(int i = 0; i < zndiv.size(); i++) {
-            if(zndiv.at(i) > 2 && (cznak >= i || cznak == 0)) {
+            if(zndiv.at(i) > 4 && (cznak >= i || cznak == 0)) {
                 cznak = i;
                 bracket = 1;
+            }
+        }
+        // умножение или деление
+        if(!cznak) {
+            for(int i = 0; i < zndiv.size(); i++) {
+                if(zndiv.at(i) > 2 && (cznak >= i || cznak == 0)) {
+                    cznak = i;
+                    bracket = 1;
+                }
             }
         }
         // хоть что-нибудь
@@ -332,6 +380,12 @@ string calculator(string inp)
             // деление
             else if(zndiv.at(cznak) == 4) {
                 a = a / b;
+                chdiv.at(pointa) = a;
+                chdiv.at(pointb) = 0;
+            }
+            //
+            else if(zndiv.at(cznak) == 5) {
+                a = pow(a, b);
                 chdiv.at(pointa) = a;
                 chdiv.at(pointb) = 0;
             }
@@ -520,8 +574,7 @@ int calc(double num[6]) {
 }
 
 
-
-int main()
+void tringle()
 {
     int vibor, vibor2;
     double A, B, C, a, b, c;
@@ -576,14 +629,46 @@ int main()
             num[4] = 3;
             num[2] = 90;
         }
+    }
+    return;
+}
 
-        if(vibor == 40)
-        {
-            string inp;
+
+
+
+int main()
+{
+    int vibor;
+    string inp;
+    while(true) {
+        vibor = 0;
+        cout << "Выберете программу" << endl
+             << "1) Количество выборов k из n" << endl
+             << "2) Вычесление треугольника" << endl
+             << "3) Калькулятор" << endl
+             << "0) Завершить работу" << endl;
+        cin >> vibor;
+        clrscr();
+
+        if(vibor == 0) {
+            break;
+        }
+
+        if(vibor == 1) {
+            viboriz();
+        }
+        
+        else if(vibor == 2) {
+            tringle();
+        }
+        
+        if(vibor == 3) {
             cout << "Введите пример: ";
             cin >> inp;
             cout << "Ответ: " + calculator(inp) << endl;
+            
         }
+
         if(vibor == 7476) {
             if(!debug) {
                 debug = true;
